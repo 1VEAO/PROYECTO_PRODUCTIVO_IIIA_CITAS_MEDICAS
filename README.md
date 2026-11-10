@@ -27,16 +27,25 @@ El sistema permite a una clínica anticipar qué pacientes tienen alta probabili
  │ silver.py    │       │  └────────┘   (auditoría)                  │
  └──────────────┘       │        ▲                                    │
  ┌──────────────┐       │________│___________________________________│
- │ 03_compare_  ├──────▶│ Entrena 4 modelos → champion_model.pkl      │
- │ train_models │       └─────────────────────────────────────────────┘
- └──────────────┘                    │
- ┌──────────────┐                    ▼
- │ 04_predict_  ├──────▶ gold.score_output (riesgo + acción)
- │ scoring.py   │
- └──────────────┘      ┌─────────────────────┐
- ┌──────────────┐      │                     │
- │   app.py     ├────▶│  Streamlit (web UI) │
- └──────────────┘      └─────────────────────┘
+ │ 05_build_    ├──────▶│ MODELO ESTRELLA (Gold analítico):           │
+ │ star_schema  │       │  dim_barrio · dim_paciente · dim_tiempo     │
+ └──────────────┘       │   → fact_citas (110.527 hechos)             │
+ ┌──────────────┐       └─────────────────────────────────────────────┘
+ │ 03_compare_  ├──────▶ Entrena 4 modelos → benchmark
+ │ train_models │
+ └──────────────┘      ┌─────────────────────────────────────────────┐
+ ┌──────────────┐      │ 06_tune_threshold.py                        │
+ │ 06_tune_     ├──────▶ Calibra hiperparámetros (RandomizedSearchCV)│
+ │ threshold.py │      │ + Threshold Tuning → champion_model.pkl     │
+ └──────────────┘      └─────────────────────────────────────────────┘
+ ┌──────────────┐      ┌─────────────────────────────────────────────┐
+ │ 04_predict_  ├──────▶ scoring batch → gold.score_output (riesgo)  │
+ │ scoring.py   │      └─────────────────────────────────────────────┘
+ └──────────────┘      ┌─────────────────────────────────────────────┐
+ ┌──────────────┐      │ 07_simulacion_montecarlo.py                 │
+ │   app.py     ├────▶│ Viabilidad económica: citas recuperadas y   │
+ └──────────────┘      │ ahorro por 1.000 citas (10.000 iteraciones) │
+   Streamlit (web)     └─────────────────────────────────────────────┘
 ```
 
 | Capa | Contenido | Principio |
@@ -62,17 +71,22 @@ El sistema permite a una clínica anticipar qué pacientes tienen alta probabili
 ├── requirements.txt                # Dependencias con versiones fijadas
 ├── .env.example                    # Plantilla de credenciales (sin secretos)
 ├── sql/
-│   └── schema_medallion.sql        # DDL completo: esquemas, tablas, RLS, grants
+│   └── schema_medallion.sql        # DDL completo: esquemas, 11 tablas, RLS, grants
 ├── src/
 │   ├── config.py                   # Cliente Supabase (lee .env)
 │   ├── 01_ingest_bronze.py         # CSV → bronze.citas_raw (lotes de 1000)
 │   ├── 02_process_silver.py        # Bronze → Silver (limpieza + features)
-│   ├── 03_compare_train_models.py  # Silver → Gold + benchmark + champion
-│   └── 04_predict_scoring.py       # Inferencia batch → gold.score_output
+│   ├── 03_compare_train_models.py  # Silver → Gold + benchmark de 4 modelos
+│   ├── 04_predict_scoring.py       # Inferencia batch → gold.score_output
+│   ├── 05_build_star_schema.py     # Silver → dim_* + fact_citas (Gold analítico)
+│   ├── 06_tune_threshold.py        # Hiperparámetros + threshold tuning del campeón
+│   └── 07_simulacion_montecarlo.py # Simulación de viabilidad económica
 ├── models/
 │   └── champion_model.pkl          # Modelo campeón versionado (despliegue)
 ├── data/raw/
 │   └── citas_medicas_raw.csv       # Dataset crudo (110.527 registros)
+├── reports/
+│   └── simulacion_montecarlo_resumen.csv
 └── notebook/
     └── 00_eda_exploratorio_bronze.ipynb
 ```
@@ -124,7 +138,7 @@ pip install -r requirements.txt
 > ⚠️ Crea **tu propio proyecto**; no reutilices el de otra persona para no alterar sus datos.
 
 1. **Crear proyecto** en el dashboard de Supabase (elige nombre y región; espera ~2 min a que aprovisione).
-2. **Crear el esquema de base de datos:** abre **SQL Editor → New query**, pega el contenido completo de [`sql/schema_medallion.sql`](sql/schema_medallion.sql) y ejecuta **Run**. Esto crea los 4 esquemas, las 7 tablas, índices, permisos y políticas RLS.
+2. **Crear el esquema de base de datos:** abre **SQL Editor → New query**, pega el contenido completo de [`sql/schema_medallion.sql`](sql/schema_medallion.sql) y ejecuta **Run**. Esto crea los 4 esquemas, las 11 tablas (7 MLOps + 4 del modelo estrella), índices, permisos y políticas RLS.
 3. **Exponer los esquemas a la API** *(paso crítico que se suele olvidar):*
    - Ve a **Settings → API → "Exposed schemas in API"**.
    - Reemplaza el valor por defecto (`public`) por:
@@ -147,14 +161,17 @@ cp .env.example .env
 
 ```bash
 python src/01_ingest_bronze.py        # ~3 min  → 110.527 filas a Bronze
-python src/02_process_silver.py       # ~5 min  → ETL + features a Silver
-python src/03_compare_train_models.py # ~3 min  → benchmark + champion + Gold
-python src/04_predict_scoring.py      # ~1 min  → scoring a gold.score_output
+python src/02_process_silver.py      # ~5 min  → ETL + features a Silver
+python src/03_compare_train_models.py # ~3 min → benchmark + champion inicial
+python src/05_build_star_schema.py   # ~5 min  → modelo estrella (dim_* + fact_citas)
+python src/06_tune_threshold.py      # ~8 min  → hiperparámetros + threshold tuning
+python src/04_predict_scoring.py     # ~1 min  → scoring batch con el campeón tuneado
+python src/07_simulacion_montecarlo.py # ~5 s  → viabilidad económica (reports/)
 ```
 
-Cada script registra su ejecución (INICIADO / EXITOSO / ERROR) en `meta.log_procesos`.
+Cada script ETL registra su ejecución (INICIADO / EXITOSO / ERROR) en `meta.log_procesos`.
 
-> ⚠️ **Los scripts no son idempotentes:** si re-ejecutas un paso, duplicarás filas en la tabla destino. Antes de repetir `02`, `03` o `04`, limpia la tabla destino desde el SQL Editor (`TRUNCATE`).
+> ⚠️ **Idempotencia:** los scripts `05` y `06` son re-ejecutables (usan upserts y regeneran el artefacto). En cambio, re-ejecutar `01`, `02` o `03` duplicará filas en su tabla destino: antes de repetirlos, limpia la tabla desde el SQL Editor (`TRUNCATE`). El script `04` limpia él mismo `score_output` antes de insertar.
 
 ### 6. Lanzar la aplicación
 
@@ -173,20 +190,50 @@ Se abre en `http://localhost:8501`. La app detecta automáticamente si hay conex
 | Modelo | Recall (clase "faltó") | F1-Score | ROC-AUC |
 |---|---|---|---|
 | LogisticRegression (baseline) | 0.5802 | 0.4084 | 0.6738 |
-| **RandomForest 🏆** | **0.8219** | 0.4441 | 0.7351 |
+| RandomForest (benchmark inicial) | 0.8219 | 0.4441 | 0.7351 |
 | XGBoost | 0.7764 | 0.4413 | 0.7286 |
 | LightGBM | 0.8125 | 0.4458 | 0.7353 |
 
 - **Criterio de selección del campeón:** maximizar el **Recall de la clase "faltó"** — desde el punto de vista del negocio, es más costoso no contactar a un paciente que sí faltaría que contactar de más.
 - **Desbalance de clases (~20% no-show):** `class_weight='balanced'` en sklearn/LightGBM y `scale_pos_weight` calculado en XGBoost.
 
-### Reglas de negocio (umbrales de riesgo)
+### Calibración final del campeón (`06_tune_threshold.py`)
+
+1. **Hiperparámetros** calibrados con `RandomizedSearchCV` (12 candidatos, CV=3, scoring ROC-AUC) sobre Random Forest: `n_estimators=200, max_depth=10, min_samples_split=10, min_samples_leaf=4`.
+2. **Threshold Tuning** (calibración del umbral de decisión): de los 44 umbrales que cumplen la meta **Recall ≥ 0.85**, se elige el de mejor F1-Score:
+
+| Métrica del campeón final (`RandomForest_Tuned`) | Valor |
+|---|---|
+| ROC-AUC (independiente del umbral) | 0.7352 |
+| **Umbral de decisión optimizado** | **0.48** |
+| **Recall con umbral optimizado** | **0.8600** ✅ meta SMART ≥ 0.85 cumplida |
+| Precision con umbral optimizado | 0.2970 |
+| F1 con umbral optimizado | 0.4415 |
+| Falsos negativos en test (20% ≈ 22.106 citas) | 625 |
+
+> 📌 **Trade-off documentado:** priorizar el Recall (minimizar pacientes en riesgo no detectados) eleva los falsos positivos (Precision 0.30). Es la decisión correcta para este caso de uso: una llamada "de más" cuesta minutos; una inasistencia no atendida cuesta una consulta completa.
+
+### Viabilidad económica (`07_simulacion_montecarlo.py`)
+
+Simulación de Montecarlo (10.000 iteraciones, semilla=42, supuestos documentados en el script) sobre una agenda de 10.000 citas/mes:
+
+| Escenario | Citas recuperadas/mes (P5–P95) | Costo por 1.000 citas |
+|---|---|---|
+| Pesimista | 167 – 262 | S/ 10.096 → S/ 8.867 |
+| **Base** | **252 – 381** | **S/ 10.096 → S/ 8.366** |
+| Optimista | 360 – 531 | S/ 10.096 → S/ 7.733 |
+
+Resultados detallados en [`reports/simulacion_montecarlo_resumen.csv`](reports/simulacion_montecarlo_resumen.csv).
+
+### Reglas de negocio (bandas de riesgo operativas)
 
 | Probabilidad de inasistencia | Clasificación | Acción recomendada |
 |---|---|---|
 | ≥ 70% | 🔴 Prioridad Alta | 📞 Llamada telefónica preventiva (24 h antes) |
 | 40% – 69% | 🟡 Prioridad Media | 💬 Recordatorio interactivo WhatsApp/SMS |
 | < 40% | 🟢 Prioridad Normal | ✉️ Recordatorio estándar |
+
+> Las bandas de riesgo (70%/40%) son la **segmentación operativa** de la agenda; el umbral 0.48 es el **punto de corte de clasificación** del modelo, calibrado para la meta de Recall.
 
 ---
 
