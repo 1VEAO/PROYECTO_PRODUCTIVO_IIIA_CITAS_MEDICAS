@@ -48,6 +48,10 @@ ESCENARIOS = {
     }
 }
 
+# Semillas deterministas por escenario (hash() de str NO es reproducible entre
+# ejecuciones porque Python lo aleatoriza por proceso)
+SEMILLA_ESCENARIO = {"Pesimista": 1, "Base": 2, "Optimista": 3}
+
 def simular_escenario(rng, efectividad):
     """Ejecuta N simulaciones de un escenario y devuelve métricas por mes."""
     # Posterior Beta de la tasa global de no-show (del dataset real)
@@ -107,7 +111,7 @@ def main():
 
     for nombre, efectividad in ESCENARIOS.items():
         # Cada escenario usa un generador derivado para reproducibilidad total
-        rng_escenario = np.random.default_rng(SEMILLA + hash(nombre) % 1000)
+        rng_escenario = np.random.default_rng(SEMILLA + SEMILLA_ESCENARIO[nombre])
         recuperadas, c_actual, c_interv, c_contactos = simular_escenario(rng_escenario, efectividad)
 
         p5, p50, p95 = np.percentile(recuperadas, [5, 50, 95])

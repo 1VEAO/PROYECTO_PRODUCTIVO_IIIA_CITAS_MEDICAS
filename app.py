@@ -218,7 +218,7 @@ if menu_opcion == "📊 Resumen de la Agenda":
         # Dataset interactivo para filtrado
         df_lead = pd.DataFrame({
             "Anticipación": ["Mismo Día (0d)", "1 a 3 Días", "4 a 14 Días", "15 a 30 Días", "Más de 30 Días"],
-            "Inasistencia (%)": [4.6, 12.8, 23.4, 29.1, 32.6]
+            "Inasistencia (%)": [4.6, 22.9, 27.3, 32.6, 33.0]
         })
         
         # Filtro de rango de visión

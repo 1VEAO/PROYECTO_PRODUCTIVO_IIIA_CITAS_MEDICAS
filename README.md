@@ -219,9 +219,9 @@ Simulación de Montecarlo (10.000 iteraciones, semilla=42, supuestos documentado
 
 | Escenario | Citas recuperadas/mes (P5–P95) | Costo por 1.000 citas |
 |---|---|---|
-| Pesimista | 167 – 262 | S/ 10.096 → S/ 8.867 |
-| **Base** | **252 – 381** | **S/ 10.096 → S/ 8.366** |
-| Optimista | 360 – 531 | S/ 10.096 → S/ 7.733 |
+| Pesimista | 167 – 263 | S/ 10.096 → S/ 8.886 |
+| **Base** | **252 – 382** | **S/ 10.094 → S/ 8.360** |
+| Optimista | 362 – 529 | S/ 10.096 → S/ 7.729 |
 
 Resultados detallados en [`reports/simulacion_montecarlo_resumen.csv`](reports/simulacion_montecarlo_resumen.csv).
 
