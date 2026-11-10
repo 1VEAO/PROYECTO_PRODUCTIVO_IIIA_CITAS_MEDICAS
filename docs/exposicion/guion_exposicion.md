@@ -1,162 +1,117 @@
-# Guion de Exposición — Sistema Inteligente de Predicción de Inasistencias a Citas Médicas
+# Guion de Exposición (10 minutos) — Sistema Inteligente de Predicción de Inasistencias
 
-> **Supuesto de duración:** 20 minutos de exposición (≈ 6–7 min por expositor) + ronda de preguntas.
-> Si el tiempo es de 15 min, usar la versión abreviada marcada con ✂️ en cada bloque.
-> **Equipo de 4 integrantes, 3 expositores:** quien no exponga puede operar la demo (notebook/app/Supabase) y auxiliar en las preguntas.
-
----
-
-## Reparto de bloques
-
-| Expositor | Bloque | Minutos | Puntos del informe que cubre |
-|---|---|---|---|
-| **Expositor 1** | Contexto, problema, datos y arquitectura | 6 | 1, 2, 3, 6, 7 |
-| **Expositor 2** | Metodología, modelado, métricas y comparación | 7 | 11, 12, 13, 14 |
-| **Expositor 3** | Resultados de negocio, economía, conclusiones | 6 | 9, 10, 15, 16 |
+> **Duración máxima: 10 min.** 3 expositores × ~3 min. El cronómetro manda: si un bloque se alarga, se recorta con las marcas 🔻, nunca improvisando.
+> Regla de oro: **una idea por minuto, una cifra por idea.** El detalle profundo se defiende en la ronda de preguntas (ver `banco_preguntas.md`).
+> Quien no exponga opera la demo (HTML/notebook/app) y apoya en las preguntas.
 
 ---
 
-## EXPOSITOR 1 — Contexto, problema, datos y arquitectura (6 min)
+## Reparto y tiempos
 
-### Apertura (30 s) — memorizar la primera frase
-
-> "Buenos días. Somos el equipo [nombres]. Presentamos un sistema de inteligencia artificial que predice con días de anticipación qué pacientes no asistirán a sus citas médicas, para que el centro de salud pueda recuperar esas consultas antes de que se pierdan. Todo lo que veremos hoy está calculado en vivo: cada cifra se puede verificar ejecutando el código."
-
-### 1. El problema (90 s)
-
-- Los centros de salud públicos pierden **~2 de cada 10 consultas por inasistencia no notificada**: en nuestro dataset real, **110.527 citas con 20,19% de ausentismo (22.319 citas perdidas)**.
-- Consecuencias: consultorios ociosos, listas de espera más largas y barreras de acceso.
-- Mostrar el gráfico de **lead time** (notebook, punto 2): mismo día 4,6% vs. más de 30 días 33,0%. Frase clave: *"la anticipación de la reserva es la variable que más predice la ausencia"*.
-- Mencionar la **paradoja del SMS**: con recordatorio masivo el ausentismo es 27,6% vs 16,7% sin él → enviar mensajes a todos no funciona; hace falta segmentar con predicción.
-
-### 2. Objetivo SMART (60 s)
-
-- Construir un clasificador con **Recall ≥ 0,85** sobre la clase "no asistirá", segmentar en 3 niveles de riesgo y desplegar un MVP funcional.
-- Adelantar el resultado: *"la meta se cumplió: Recall 0,86 con umbral calibrado"*. (El detalle lo desarrolla el Expositor 2.)
-
-### 3. Arquitectura Medallion en Supabase (3 min) — DEMO
-
-Mostrar en el notebook la **tabla de inventario de las 11 tablas** (celda del punto 1) mientras se explica:
-
-- **Bronze:** `citas_raw`, 110.527 registros crudos e inmutables, con metadatos de origen.
-- **Silver:** `citas_cleaned` — estandarización y *feature engineering*: `lead_time`, `grupo_edad`, e historial de ausentismo acumulado **sin fuga de datos**.
-- **Gold:** dos niveles — (a) **modelo estrella** para analítica: `dim_barrio` (81 barrios), `dim_paciente` (62.299 pacientes), `dim_tiempo` (27 fechas), `fact_citas` (110.527 hechos); (b) tablas MLOps: `ml_train_dataset`, `score_input`, `score_output`, `feedback_loop`.
-- **Auditoría:** cada script registra ejecución y volumen en `meta.log_procesos`.
-- Si hay conexión: abrir el panel de Supabase 20 segundos y mostrar `fact_citas`.
-
-### Cierre del bloque (30 s)
-
-> "Con la base lista y verificada, la pregunta siguiente era qué algoritmo predice mejor. Eso lo presenta [nombre del Expositor 2]."
-
-### ✂️ Versión abreviada (si tocan 15 min): solo problema + lead time + inventario de tablas, sin SMART.
+| Expositor | Bloque | Tiempo |
+|---|---|---|
+| **Expositor 1** | Problema, datos y arquitectura | 3:00 |
+| **Expositor 2** | Modelo, métricas y comparación | 3:30 |
+| **Expositor 3** | Producto, economía y cierre | 3:00 |
+| | Transiciones incluidas | **≈ 9:30** |
 
 ---
 
-## EXPOSITOR 2 — Metodología, modelado, métricas y comparación (7 min)
+## EXPOSITOR 1 — Problema, datos y arquitectura (3:00)
 
-### Transición de entrada (15 s)
+### Apertura (20 s) — primera frase memorizada
 
-> "Gracias. Voy a mostrar cómo construimos y validamos el modelo, y por qué cada número que presentamos es reproducible."
+> "Somos [nombres]. Nuestro sistema predice con días de anticipación qué pacientes no asistirán a su cita médica, para recuperar esas consultas antes de perderlas. Todas las cifras que veremos se calculan en vivo desde el código."
 
-### 1. Metodología CRISP-DM y preparación (90 s)
+### El problema (80 s) — DEMO: gráfico de lead time
 
-- Comprensión del negocio → EDA → preparación → modelado → evaluación → despliegue.
-- 9 variables predictoras (`lead_time`, `age`, `scholarship`, `hipertension`, `diabetes`, `alcoholism`, `handcap`, `sms_received`, `historical_noshows`), objetivo binario.
-- Split **estratificado 80/20 con semilla 42**: 88.421 entrenamiento / 22.106 prueba.
+- Dataset real: **110.527 citas**, **20,19% de ausentismo** → 22.319 consultas perdidas: consultorios ociosos y listas de espera.
+- Mostrar el gráfico de lead time: *"citar el mismo día casi nunca falla (4,6%); citar con más de 30 días falla un tercio de las veces (33,0%)"*.
+- Paradoja del SMS en una frase: *"enviar recordatorios a todos no funciona — con SMS el ausentismo es 27,6% vs 16,7% sin ellos. Hay que segmentar con predicción."*
 
-### 2. Benchmark de 4 modelos (2 min) — DEMO
+### Arquitectura (70 s) — DEMO: tabla de inventario de 11 tablas
 
-Mostrar la **tabla del benchmark** (notebook, punto 14):
+- **Medallion en Supabase, un solo punto de verdad:** Bronze crudo inmutable (110.527) → Silver con *features* derivadas (`lead_time`, historial sin fuga de datos) → Gold con **modelo estrella** (`fact_citas` 110.527 + `dim_barrio`, `dim_paciente` 62.299, `dim_tiempo`) y tablas MLOps.
+- Auditoría de cada corrida en `meta.log_procesos`. Frase puente:
+
+> "Con la base lista, la pregunta era qué algoritmo predice mejor. [Expositor 2]."
+
+### 🔻 Recorte de emergencia: dejar solo problema + lead time; arquitectura en una frase ("Bronze→Silver→Gold en Supabase, 11 tablas auditadas").
+
+---
+
+## EXPOSITOR 2 — Modelo, métricas y comparación (3:30)
+
+### Transición (10 s)
+
+> "Gracias. En 3 minutos: qué modelos probamos, qué ganó y por qué creerle a la métrica."
+
+### Benchmark (90 s) — DEMO: tabla del punto 14
 
 | Modelo | Recall | ROC-AUC |
 |---|---|---|
 | Línea base ingenua (todos asisten) | 0,00 | — |
 | Regresión Logística | 0,5802 | 0,6738 |
-| XGBoost | 0,7764 | 0,7286 |
-| LightGBM | 0,8125 | 0,7353 |
+| XGBoost / LightGBM | 0,7764 / 0,8125 | 0,7286 / 0,7353 |
 | **Random Forest tuneado ⭐** | **0,8600** | **0,7352** |
 
-- Criterio de selección: **Recall de la clase "no asistirá"** → Random Forest.
-- Frase para la pregunta obvia: *"LightGBM empató en AUC (0,7353 vs 0,7351); la diferencia no es significativa y el criterio declarado fue el Recall, donde Random Forest fue superior tanto antes como después del tuning."*
+- 4 algoritmos, mismo split estratificado 80/20, semilla 42. Criterio de selección: **Recall de la clase "no asistirá"** → ganó Random Forest, calibrado con RandomizedSearchCV.
+- Contra la regla de negocio actual: **+86 puntos de captura**; contra el baseline estadístico: **+28**.
 
-### 3. Calibración del campeón (2 min)
+### Matriz de confusión (60 s) — DEMO: celda del punto 13
 
-- **RandomizedSearchCV**: 12 combinaciones, validación cruzada de 3 pliegues, criterio ROC-AUC → `n_estimators=200, max_depth=10, min_samples_split=10, min_samples_leaf=4, class_weight='balanced'`.
-- **Threshold tuning**: de 44 umbrales que cumplían la meta se eligió **0,48** por mejor F1 → Recall sube de 0,8219 a **0,8600** (meta ≥ 0,85 cumplida).
+- Prueba de 22.106 citas: **3.839 ausentes detectados, solo 625 se escaparon de 4.464** → **de cada 100 que faltan, detectamos 86** (meta ≥ 0,85 cumplida con umbral calibrado 0,48).
+- Trade-off con una frase: *"Precision 0,297: contactamos pacientes con perfil de riesgo que asisten — cuesta S/ 0,80 de llamada, no una consulta de S/ 50."*
 
-### 4. Métricas verificadas en vivo (90 s) — DEMO
+### Verificabilidad (40 s)
 
-Mostrar la celda del punto 13 con la matriz de confusión:
+- *"Estas métricas no están en una diapositiva: el notebook recalcula el pipeline con la misma semilla y coincide exactamente con el modelo desplegado. Lo pueden ejecutar."*
 
-- Test: **8.556 TN / 9.086 FP / 625 FN / 3.839 TP**.
-- Lectura operativa: *"de cada 100 pacientes que van a faltar, detectamos 86; se nos escapan 14"*. Solo **625 de 4.464** ausentes reales no se detectaron.
-- Trade-off declarado: Precision 0,297 → contactamos pacientes que al final asisten; cuesta S/ 0,80 de llamada, no una consulta de S/ 50.
-- Verificación: las métricas recalculadas en el notebook **coinciden exactamente** con el artefacto desplegado `champion_model.pkl`.
+> Puente: "Detectar 86% de las ausencias está bien; la pregunta es qué vale en soles. [Expositor 3]."
 
-### Cierre del bloque (30 s)
-
-> "Resumen: el modelamiento supera a la regla de negocio actual en +86 puntos de captura y al baseline estadístico en +28 puntos de Recall. La pregunta siguiente es qué vale esto en soles. [nombre del Expositor 3]."
-
-### ✂️ Versión abreviada: benchmark + matriz de confusión + una frase de tuning.
+### 🔻 Recorte de emergencia: solo tabla de benchmark + una cifra de la matriz (625 FN de 4.464).
 
 ---
 
-## EXPOSITOR 3 — Resultados de negocio, economía y conclusiones (6 min)
+## EXPOSITOR 3 — Producto, economía y cierre (3:00)
 
-### Transición de entrada (15 s)
+### Transición (10 s)
 
-> "Gracias. Ya tenemos un modelo que detecta 86% de las inasistencias. Veamos cómo se convierte eso en citas recuperadas y soles."
+> "Gracias. El modelo ya está en un producto y su beneficio se puede cuantificar."
 
-### 1. El producto: app Streamlit (2 min) — DEMO (plan B: capturas)
+### El producto: app Streamlit (70 s) — DEMO rápida (una captura de respaldo lista)
 
-- **Tablero de control:** agenda del día priorizada por riesgo (muestra de 50 citas: 8% alto, 56% medio, 36% bajo).
-- **Evaluador individual:** probabilidad en tiempo real + mensaje de WhatsApp personalizado generado automáticamente.
-- **Ciclo de retroalimentación:** registro post-consulta en `feedback_loop` → insumo para reentrenamientos.
-- Regla operativa: Riesgo Alto (≥70%) = llamada telefónica · Medio (40–69%) = WhatsApp/SMS · Bajo (<40%) = correo.
+- **Tablero diario** prioriza la agenda por riesgo; **evaluador individual** da la probabilidad en segundos y genera el **mensaje de WhatsApp** personalizado; el personal registra el desenlace en `feedback_loop` para reentrenar.
+- Regla operativa: Alto (≥70%) llamada · Medio (40–69%) WhatsApp/SMS · Bajo (<40%) correo.
 
-### 2. Viabilidad económica — Montecarlo (2 min) — DEMO
+### Economía (80 s) — DEMO: histograma Montecarlo
 
-Mostrar el **histograma del escenario base** (notebook, punto 15):
+- Simulación reproducible (10.000 iteraciones, semillas fijas, supuestos en el código).
+- Escenario base: **312 citas recuperadas/mes** (P50; rango 252–382); costo por 1.000 citas baja de **S/ 10.094 a S/ 8.360**.
+- Frase clave: *"cada sol invertido en contactación evita hasta 15 soles de pérdida; incluso en el peor escenario el retorno es 7,7 a 1."*
 
-- Simulación **reproducible**: 10.000 iteraciones, semillas fijas, supuestos documentados en el código.
-- Escenario base: **312 citas recuperadas/mes (P50)**, rango honesto **252–382 (P5–P95)**.
-- Costo por 1.000 citas: de **S/ 10.094 a S/ 8.360**.
-- Frase clave: *"cada sol invertido en contactación (≈ S/ 1.580/mes) evita entre S/ 7,7 y S/ 15 de pérdida según el escenario; ahorro anual estimado de S/ 145.000 a S/ 284.000"*. Incluso el pesimista se paga 7,7 veces.
+### Cierre final (40 s) — memorizado
 
-### 3. Conclusiones y recomendaciones (90 s)
+> "En resumen: meta predictiva cumplida y verificada, arquitectura replicable de punta a punta, y sostenibilidad económica demostrada en todos los escenarios. El informe completo —con cada cifra calculada en vivo— está en el repositorio. Muchas gracias; quedamos atentos a sus preguntas."
 
-1. Meta predictiva **cumplida y verificada** (Recall 0,86, AUC 0,7352).
-2. El **lead time** es la palanca de gestión principal.
-3. La segmentación predictiva revierte la paradoja del SMS.
-4. **Sostenible en todos los escenarios** (retorno mínimo 7,7:1).
-5. Arquitectura **determinista, auditable y replicable** — cualquiera puede regenerar este informe ejecutando el notebook.
-6. Recomendaciones: pilotar el scoring masivo diario, **piloto A/B** para calibrar efectividades con datos propios, reentrenamiento con `feedback_loop` y enriquecimiento de variables para superar el techo de AUC ≈ 0,735.
-
-### Cierre final (15 s) — memorizar
-
-> "El sistema demuestra que predecir la inasistencia no es un ejercicio académico: es recuperar más de 300 consultas al mes y hacer que cada sol invertido vuelva multiplicado. El informe completo, con cada cifra calculada en vivo, está en el repositorio. Muchas gracias — quedamos atentos a sus preguntas."
-
-### ✂️ Versión abreviada: app con una captura + retorno 11:1 + cierre.
+### 🔻 Recorte de emergencia: una vista de la app + retorno 11:1 + cierre.
 
 ---
 
-## Consejos generales para los tres
+## Consejos para los 10 minutos
 
-1. **Ensayar con cronómetro** al menos una vez completa; el riesgo #1 es pasarse de tiempo y que quiten el bloque de economía.
-2. **Plan B de demo:** el HTML `informe_cpp2_ejecutable.html` tiene todas las salidas renderizadas — si falla internet o Supabase, se muestra el HTML y la exposición no se entera.
-3. **No leer las diapositivas**: la tabla de benchmark y la matriz de confusión se explican con la mano, no con lectura.
-4. **Cada expositor debe poder responder lo básico de los otros bloques** (ver `banco_preguntas.md` y `chuleta_cifras.md`).
-5. Nombres de tablas y cifras exactas: nunca improvisar — están en la chuleta.
+1. **Ensayar con cronómetro dos veces.** El error #1 en 10 min es llegar sin tiempo al cierre — la economía y el cierre son lo que el profesor recuerda.
+2. **Demo mínima y blindada:** mostrar el **HTML ya renderizado** (`informe_cpp2_ejecutable.html`), no ejecutar el notebook en vivo (toma minutos). Solo si sobra tiempo al final, correr una celda.
+3. **Nadie lee diapositivas:** las tablas se explican con la mano.
+4. **Las preguntas no consumen los 10 min:** la profundidad va en la ronda de preguntas — está preparada en `banco_preguntas.md` (30+ preguntas con respuesta).
+5. Los 3 expositores dominan los **10 números de la chuleta** — el profesor puede preguntar a cualquiera.
 
-## Mapa de diapositivas sugerido (si arman PPT, 10 láminas)
+## Mapa de diapositivas sugerido (7 láminas para 10 min)
 
 1. Portada (título, equipo, curso)
-2. El problema en 3 números: 110.527 citas · 20,19% ausentismo · 33% con cita lejana
-3. Paradoja del SMS (por qué segmentar)
-4. Arquitectura Medallion (diagrama Bronze→Silver→Gold)
-5. Objetivo SMART y meta Recall ≥ 0,85
-6. Benchmark de modelos (tabla del punto 14)
-7. Matriz de confusión + trade-off Recall/Precision
-8. App Streamlit (capturas de las 3 vistas)
-9. Montecarlo: histograma + retorno 11:1
-10. Conclusiones y recomendaciones
+2. El problema en 3 números: 110.527 · 20,19% · 33% con cita lejana
+3. Arquitectura Medallion (diagrama Bronze→Silver→Gold)
+4. Benchmark de 4 modelos (tabla del punto 14)
+5. Matriz de confusión + trade-off (625 FN, Recall 0,86)
+6. App Streamlit (captura del tablero + WhatsApp)
+7. Montecarlo y cierre: 312 citas/mes · retorno 11:1

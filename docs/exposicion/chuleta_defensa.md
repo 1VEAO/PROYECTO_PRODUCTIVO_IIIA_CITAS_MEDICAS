@@ -3,11 +3,11 @@
 ## 1. Comandos para la demo (en orden de uso)
 
 ```bash
-# Abrir el informe ejecutable (plan A de demo, todo está calculado)
-jupyter notebook notebook/01_informe_cpp2_ejecutable.ipynb
-
-# Plan B sin internet: el HTML tiene TODAS las salidas renderizadas
+# PLAN A para 10 min: HTML con TODAS las salidas ya renderizadas
 xdg-open informe_cpp2_ejecutable.html
+
+# Solo si sobra tiempo al final: notebook ejecutable (cada celda corre en vivo)
+jupyter notebook notebook/01_informe_cpp2_ejecutable.ipynb
 
 # Mostrar la app (terminal aparte; requiere .env con credenciales)
 streamlit run app.py
@@ -59,8 +59,8 @@ cat reports/simulacion_montecarlo_resumen.csv
 
 ## 5. Checklist noche anterior
 
-- [ ] Ensayo cronometrado completo (20 min)
-- [ ] Notebook abierto y con kernel listo; HTML abierto en pestaña de respaldo
+- [ ] Ensayo cronometrado completo (10 min estrictos)
+- [ ] HTML abierto y listo (demo principal); notebook como respaldo
 - [ ] `.venv` activado y `streamlit run app.py` probado hoy
 - [ ] Proyector probado con el gráfico de lead time (ver contraste)
 - [ ] Chuleta impresa / en el celular
