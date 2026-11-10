@@ -1,8 +1,37 @@
+# ===========================================================================
+# Entorno Python
+# ===========================================================================
+.venv/
 venv/
-.env
 __pycache__/
-*.pkl
+*.pyc
+
+# ===========================================================================
+# Credenciales (nunca versionar secretos reales)
+# ===========================================================================
+.env
+
+# ===========================================================================
+# Sistema
+# ===========================================================================
 .DS_Store
-Data/
-data/
-*.csv
+
+# ===========================================================================
+# Artefactos ML
+# Los *_v1.pkl se regeneran ejecutando: python src/03_compare_train_models.py
+# Se versiona ÚNICAMENTE el modelo campeón (8.6 MB) para poder desplegar
+# la aplicación sin necesidad de reentrenar.
+# ===========================================================================
+models/*
+!models/champion_model.pkl
+
+# ===========================================================================
+# Datos
+# Se versiona el CSV crudo original (dataset público de Kaggle, 110.527
+# registros) para que el pipeline sea 100% replicable desde cero.
+# Cualquier otro archivo de datos queda fuera del repositorio.
+# ===========================================================================
+data/*
+!data/raw/
+data/raw/*
+!data/raw/citas_medicas_raw.csv
