@@ -1,0 +1,4 @@
+escenario,citas_recuperadas_p5,citas_recuperadas_p50,citas_recuperadas_p95,costo_actual_p50_soles,costo_intervencion_p50_soles,ahorro_p50_soles,costo_por_1000_citas_actual,costo_por_1000_citas_intervencion
+Pesimista,167,210,262,100960.58,88671.93,12280.2,10096.06,8867.19
+Base,252,311,381,100962.94,83661.98,17325.72,10096.29,8366.2
+Optimista,360,439,531,100965.26,77329.8,23608.98,10096.53,7732.98
