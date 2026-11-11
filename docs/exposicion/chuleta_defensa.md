@@ -17,9 +17,9 @@ cat reports/simulacion_montecarlo_resumen.csv
 ```
 
 **Momentos de demo por expositor:**
-- **Exp. 1:** notebook → tabla inventario 11 tablas (punto 1) + gráfico lead time (punto 2)
-- **Exp. 2:** notebook → tabla benchmark (punto 14) + matriz de confusión (punto 13)
-- **Exp. 3:** app Streamlit (3 vistas) + histograma Montecarlo (punto 15)
+- **Exp. 1:** HTML → tabla inventario 11 tablas (punto 1) + gráfico lead time (punto 2)
+- **Exp. 2:** HTML → tabla benchmark (punto 14) + matriz de confusión (punto 13)
+- **Exp. 3:** app Streamlit (tablero, evaluador, **Registro de Atención con KPIs de fidelización**) + histograma Montecarlo
 
 ## 2. Los números base (memorizar sí o sí)
 
@@ -37,6 +37,7 @@ cat reports/simulacion_montecarlo_resumen.csv
 | SMS paradoja | 27,57% con SMS vs 16,70% sin |
 | Tablas | 11 · dim_paciente 62.299 · dim_barrio 81 · dim_tiempo 27 · fact_citas 110.527 |
 | Muestra app (50 citas) | 8% alto · 56% medio · 36% bajo |
+| Fidelización (piloto) | 150 encuestas · 4,17 ⭐ media · 20% citas recuperadas · 23,3 min media |
 | Montecarlo | 10.000 iter, semilla 42 · Base P50=312 (P5–P95: 252–382) |
 | Economía | S/ 10.094 → S/ 8.360 por 1.000 citas · ahorro S/ 17.331/mes (base) · retorno 7,7:1 a 15:1 (base 11:1) |
 | Contactación | ≈ S/ 1.580/mes · consulta perdida S/ 50 · llamada S/ 0,80 · SMS S/ 0,10 |

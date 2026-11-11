@@ -467,10 +467,52 @@ elif menu_opcion == "🔄 Registro de Atención":
     st.markdown("""
         <div class="header-banner">
             <h2 style='margin:0;'>🔄 Registro Post-Consulta</h2>
-            <p style='margin:5px 0 0 0; opacity:0.9;'>Módulo para registrar la duración real de la cita y la satisfacción del paciente</p>
+            <p style='margin:5px 0 0 0; opacity:0.9;'>Registra la duración real y la satisfacción del paciente, y monitorea los KPIs del ciclo de fidelización</p>
         </div>
     """, unsafe_allow_html=True)
-    
+
+    # ── KPIs del Ciclo de Fidelización (leídos de gold.feedback_loop) ──
+    st.markdown("##### 💙 KPIs del Ciclo de Fidelización")
+    df_fb = pd.DataFrame()
+    if supabase:
+        try:
+            r_fb = supabase.schema("gold").table("feedback_loop").select("*").execute()
+            df_fb = pd.DataFrame(r_fb.data)
+        except Exception:
+            pass
+
+    if not df_fb.empty:
+        sat_media = df_fb["satisfaction_score"].mean()
+        dur_media = df_fb["actual_duration_min"].mean()
+        pct_recuperadas = df_fb["rescheduled_status"].str.contains("Reprogramada", na=False).mean() * 100
+
+        k1, k2, k3, k4 = st.columns(4)
+        k1.markdown(f'<div class="card-metric"><div class="card-metric-title">Encuestas Registradas</div><div class="card-metric-val">{len(df_fb):,}</div></div>', unsafe_allow_html=True)
+        k2.markdown(f'<div class="card-metric"><div class="card-metric-title">Satisfacción Media</div><div class="card-metric-val">{sat_media:.2f} ⭐</div></div>', unsafe_allow_html=True)
+        k3.markdown(f'<div class="card-metric"><div class="card-metric-title">Citas Recuperadas</div><div class="card-metric-val">{pct_recuperadas:.1f}%</div></div>', unsafe_allow_html=True)
+        k4.markdown(f'<div class="card-metric"><div class="card-metric-title">Duración Media</div><div class="card-metric-val">{dur_media:.1f} min</div></div>', unsafe_allow_html=True)
+
+        f1, f2 = st.columns(2)
+        with f1:
+            st.markdown("##### ⭐ Distribución de Calificaciones")
+            df_sat = df_fb["satisfaction_score"].value_counts().sort_index().reset_index()
+            df_sat.columns = ["Calificación", "Encuestas"]
+            fig_sat = px.bar(df_sat, x="Calificación", y="Encuestas", color="Encuestas",
+                             color_continuous_scale="Blues", text="Encuestas")
+            fig_sat.update_layout(margin=dict(t=10, b=10, l=10, r=10), xaxis=dict(dtick=1))
+            st.plotly_chart(fig_sat, use_container_width=True, config={'displayModeBar': False})
+        with f2:
+            st.markdown("##### 🎯 Estado Final de las Citas Encuestadas")
+            df_estado = df_fb["rescheduled_status"].value_counts().reset_index()
+            df_estado.columns = ["Estado Final", "Encuestas"]
+            fig_est = px.pie(df_estado, names="Estado Final", values="Encuestas", hole=0.5)
+            fig_est.update_layout(margin=dict(t=10, b=10, l=10, r=10))
+            st.plotly_chart(fig_est, use_container_width=True, config={'displayModeBar': False})
+    elif supabase:
+        st.info("📭 Aún no hay encuestas en el ciclo de retroalimentación. La primera aparecerá aquí al guardar el formulario de abajo.")
+    else:
+        st.info("⚪ Modo local: los KPIs de fidelización se muestran al conectar Supabase.")
+
     with st.form("form_registro_atencion"):
         st.markdown("##### 📋 Datos de la Cita Atendida:")
         c_r1, c_r2 = st.columns(2)

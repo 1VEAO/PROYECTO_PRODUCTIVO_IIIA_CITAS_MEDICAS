@@ -160,6 +160,10 @@
 ### F5. "¿Por qué 6 semanas era plausible?"
 **Corta:** Porque el alcance fue disciplinado: pipeline determinista de 7 scripts, un solo dataset, MVP funcional en lugar de producto, y simulación en lugar de experimento en vivo. Cada semana tenía entregable verificable (ver medios de verificación del marco lógico).
 
+### F6. ⚠️ "El título del proyecto dice 'fidelización de pacientes' — ¿dónde está esa parte?"
+**Corta:** En el ciclo de retroalimentación: la app registra tras cada consulta la duración real y la satisfacción (1–5 ⭐) en `gold.feedback_loop`, muestra los **KPIs del ciclo de fidelización** (satisfacción media, % de citas recuperadas por reprogramación, duración media) y el mensaje de WhatsApp ya incluye el canal de reprogramación.
+**Desarrollo:** El piloto de encuestas (150 encuestas deterministas, semilla 42, **vinculadas a citas reales del dataset**: 120 de atenciones completadas y 30 de pacientes ausentes recuperados vía reprogramación) arroja satisfacción media **4,17/5** y **20% de citas recuperadas** — insumo declarado para los reentrenamientos. Si el profesor pregunta si son encuestas reales: honestidad — **son un piloto simulado para demostrar el ciclo**; el flujo de captura real se ejecuta desde la vista "Registro de Atención" y cualquier encuesta guardada ahí actualiza los KPIs al instante. Trabajo futuro: módulo de acciones proactivas de recuperación (lista de ausentes con contacto personalizado).
+
 ---
 
 ## Los 10 números que TODOS deben saber de memoria

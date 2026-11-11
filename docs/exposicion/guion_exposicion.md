@@ -81,7 +81,8 @@
 
 ### El producto: app Streamlit (70 s) — DEMO rápida (una captura de respaldo lista)
 
-- **Tablero diario** prioriza la agenda por riesgo; **evaluador individual** da la probabilidad en segundos y genera el **mensaje de WhatsApp** personalizado; el personal registra el desenlace en `feedback_loop` para reentrenar.
+- **Tablero diario** prioriza la agenda por riesgo; **evaluador individual** da la probabilidad en segundos y genera el **mensaje de WhatsApp** personalizado.
+- **Fidelización:** el registro post-consulta alimenta los **KPIs del ciclo** — piloto de 150 encuestas con satisfacción media **4,2 ⭐** y **20% de citas recuperadas** por reprogramación.
 - Regla operativa: Alto (≥70%) llamada · Medio (40–69%) WhatsApp/SMS · Bajo (<40%) correo.
 
 ### Economía (80 s) — DEMO: histograma Montecarlo
