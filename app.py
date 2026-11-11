@@ -165,8 +165,8 @@ with st.sidebar:
 if menu_opcion == "📊 Resumen de la Agenda":
     st.markdown("""
         <div class="header-banner">
-            <h2 style='margin:0;'>📊 Estado General de la Agenda Médica</h2>
-            <p style='margin:5px 0 0 0; opacity:0.9;'>Vista simplificada del flujo de atenciones y nivel de confirmación de citas</p>
+            <h2 style='margin:0;'>📊 Agenda Operativa del Centro de Salud</h2>
+            <p style='margin:5px 0 0 0; opacity:0.9;'>Citas pendientes de los próximos días, priorizadas por el modelo de riesgo de inasistencia</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -182,8 +182,60 @@ if menu_opcion == "📊 Resumen de la Agenda":
 
     c1, c2, c3 = st.columns(3)
     c1.markdown(f'<div class="card-metric"><div class="card-metric-title">Total Citas Registradas</div><div class="card-metric-val">{cant_citas:,}</div></div>', unsafe_allow_html=True)
-    c2.markdown(f'<div class="card-metric"><div class="card-metric-title">Citas Evaluadas</div><div class="card-metric-val">{cant_evaluadas:,}</div></div>', unsafe_allow_html=True)
-    c3.markdown(f'<div class="card-metric"><div class="card-metric-title">Efectividad de Asistencia</div><div class="card-metric-val">79.8%</div></div>', unsafe_allow_html=True)
+    c2.markdown(f'<div class="card-metric"><div class="card-metric-title">Citas Pendientes Evaluadas</div><div class="card-metric-val">{cant_evaluadas:,}</div></div>', unsafe_allow_html=True)
+
+    # ── 📅 Agenda pendiente de los próximos días (score_output × score_input) ──
+    df_agenda = pd.DataFrame()
+    if supabase:
+        try:
+            r_out = supabase.schema("gold").table("score_output").select(
+                "appointment_id, patient_id, probability_noshow, risk_level, recommended_action").execute()
+            r_in = supabase.schema("gold").table("score_input").select(
+                "appointment_id, appointment_day, age, lead_time").execute()
+            df_out, df_in = pd.DataFrame(r_out.data), pd.DataFrame(r_in.data)
+            if not df_out.empty and not df_in.empty:
+                df_agenda = df_out.merge(df_in, on="appointment_id", how="left")
+        except Exception:
+            pass
+
+    if not df_agenda.empty:
+        dt_cita = pd.to_datetime(df_agenda["appointment_day"], utc=True)
+        hoy = pd.Timestamp.now(tz="UTC").normalize()
+        df_agenda["fecha"] = dt_cita.dt.date
+        df_agenda["hora"] = dt_cita.dt.strftime("%H:%M")
+        dias_diff = (dt_cita.dt.normalize() - hoy).dt.days
+        df_agenda["etiqueta_dia"] = dias_diff.map(lambda n: "Hoy" if n == 0 else ("Mañana" if n == 1 else f"En {n} días"))
+        # Nombres sintéticos deterministas (el dataset no contiene identificadores personales)
+        NOMBRES = ["Ana María", "Carlos Eduardo", "Fernanda", "João Pedro", "Luiza", "Marcos Vinícius",
+                   "Juliana", "Rafael", "Camila", "Bruno", "Patrícia", "André Luís", "Beatriz",
+                   "Gabriel", "Larissa", "Thiago", "Vanessa", "Eduardo", "Renata", "Felipe"]
+        APELLIDOS = ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Almeida",
+                     "Costa", "Gomes", "Martins", "Araújo", "Barbosa", "Ribeiro", "Carvalho",
+                     "Lima", "Pereira", "Nogueira", "Moraes", "Cardoso", "Teixeira"]
+        pid = df_agenda["patient_id"].astype("int64")
+        df_agenda["paciente"] = [f"{NOMBRES[p % 20]} {APELLIDOS[(p // 13) % 20]}" for p in pid]
+    else:
+        dias_diff = pd.Series(dtype=int)
+
+    n_alto_riesgo = int(df_agenda["risk_level"].str.contains("Alto", na=False).sum()) if not df_agenda.empty else 0
+    c3.markdown(f'<div class="card-metric"><div class="card-metric-title">🔴 Alto Riesgo Pendiente</div><div class="card-metric-val">{n_alto_riesgo}</div></div>', unsafe_allow_html=True)
+
+    if not df_agenda.empty:
+        dias_disponibles = df_agenda[["etiqueta_dia", "fecha"]].drop_duplicates().sort_values("fecha")
+        opciones = ["Todas las citas"] + [f"{r.etiqueta_dia} — {r.fecha:%a %d %b}" for r in dias_disponibles.itertuples()]
+        sel_dia = st.selectbox("🗓️ Mostrar agenda de:", opciones)
+        df_vista = df_agenda if sel_dia == "Todas las citas" else df_agenda[df_agenda["etiqueta_dia"] == sel_dia.split(" — ")[0]]
+
+        df_tabla = (df_vista.sort_values(["fecha", "hora"])
+                    .assign(probabilidad=lambda d: (d["probability_noshow"] * 100).round(1))
+                    [["hora", "paciente", "age", "probabilidad", "risk_level", "recommended_action", "fecha"]]
+                    .rename(columns={"hora": "Hora", "paciente": "Paciente", "age": "Edad",
+                                     "probabilidad": "Prob. de Falta (%)", "risk_level": "Nivel de Riesgo",
+                                     "recommended_action": "Acción Recomendada"}))
+        st.dataframe(df_tabla, use_container_width=True, hide_index=True)
+        st.caption(f"⚙️ **Modo operacional simulado (replay):** agenda de los próximos días construida con citas reales del histórico (fechas desplazadas de forma coherente), puntuada por el modelo campeón mediante el job diario de scoring (`src/04`). Los nombres son sintéticos: el dataset no contiene identificadores personales.")
+    else:
+        st.info("📭 No hay citas pendientes en `score_output`. Ejecuta `python src/09_simular_agenda_operativa.py --force` para construir la agenda operativa.")
 
     st.markdown("<br>", unsafe_allow_html=True)
     

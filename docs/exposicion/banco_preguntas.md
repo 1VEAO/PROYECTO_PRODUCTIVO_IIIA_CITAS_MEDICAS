@@ -15,6 +15,10 @@
 **Corta:** No — 20,19% de inasistencias. Por eso la exactitud es engañosa y usamos balanceo de clases y métricas robustas al desbalance.
 **Desarrollo:** Un modelo ingenuo que diga "todos asisten" logra 79,8% de exactitud con 0% de captura de inasistentes (está en nuestra tabla de benchmark). Respuestas: `class_weight='balanced'` en todos los modelos, `scale_pos_weight` en XGBoost, y evaluar con Recall/F1/AUC en lugar de Accuracy.
 
+### A7. ⚠️ "Sus citas son de 2016 — ¿cómo puede la app mostrar la agenda ACTUAL del centro?"
+**Corta:** Con el modo operacional simulado (replay): la agenda de los próximos 5 días se construye con citas reales del histórico cuyas fechas se desplazan de forma coherente (la reserva queda en el pasado según el lead time real de cada cita), y se puntúan con el mismo job diario de scoring que usaría una clínica real.
+**Desarrollo:** El script `src/09_simular_agenda_operativa.py` genera 200 citas pendientes (hoy → +4 días: 60/50/40/30/20) con horas de atención simuladas, las registra en `gold.score_input` —la tabla diseñada para "citas pendientes de evaluar"— y ejecuta el pipeline real (`src/04_predict_scoring.py`) que produce `gold.score_output`. La app lee esa agenda priorizada por día. La cadena es exactamente la que operaría en producción: solo cambiaría el origen de `score_input` (la agenda real del EMR en lugar del replay). Los nombres son sintéticos porque el dataset no contiene identificadores personales. En producción real el job correría cada madrugada sobre la agenda del día siguiente.
+
 ### A3. ⚠️ ¿Cómo calcularon el historial de ausentismo sin fuga de datos?
 **Corta:** Acumulado temporal por paciente, restando siempre la fila actual: `cumsum() - valor_actual`, con orden por fecha de programación. La cita nunca "ve" su propio desenlace ni desenlaces futuros.
 **Desarrollo:** Es la fuga de datos más común en este tipo de problema. Si calcularas el total histórico de ausencias del paciente incluyendo la cita actual, el modelo estaría "viendo la respuesta". Lo verificamos ordenando por `scheduled_day` dentro de cada `patient_id`. Sin este cuidado, el Recall sería artificialmente alto.
@@ -73,7 +77,7 @@
 
 ### B10. ¿Cómo están definidos los 3 niveles de riesgo?
 **Corta:** Riesgo Alto: probabilidad ≥ 70% → llamada telefónica; Medio: 40–69% → WhatsApp/SMS; Bajo: < 40% → correo estándar.
-**Desarrollo:** La intensidad de la intervención escala con el riesgo y con el costo: lo humano y caro se reserva para donde el modelo concentra la probabilidad de pérdida. En la muestra de 50 citas: 8% alto, 56% medio, 36% bajo.
+**Desarrollo:** La intensidad de la intervención escala con el riesgo y con el costo: lo humano y caro se reserva para donde el modelo concentra la probabilidad de pérdida. En la agenda operativa simulada (200 citas pendientes de 5 días): 23 de riesgo alto (11.5%) y 177 de riesgo medio (88.5%) — al filtrar citas con lead time ≥ 5 días, la agenda pendiente concentra solo casos con acción preventiva real.
 
 ---
 

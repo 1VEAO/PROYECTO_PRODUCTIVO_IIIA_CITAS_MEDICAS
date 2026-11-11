@@ -7803,7 +7803,7 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="SISTEMA-INTELIGENTE-DE-PREDICCI%C3%93N-DE-INASISTENCIAS-A-CITAS-M%C3%89DICAS,-AGENDAMIENTO-ADAPTATIVO-Y-FIDELIZACI%C3%93N-DE-PACIENTES">SISTEMA INTELIGENTE DE PREDICCIÓN DE INASISTENCIAS A CITAS MÉDICAS, AGENDAMIENTO ADAPTATIVO Y FIDELIZACIÓN DE PACIENTES<a class="anchor-link" href="#SISTEMA-INTELIGENTE-DE-PREDICCI%C3%93N-DE-INASISTENCIAS-A-CITAS-M%C3%89DICAS,-AGENDAMIENTO-ADAPTATIVO-Y-FIDELIZACI%C3%93N-DE-PACIENTES">¶</a></h1><p><strong>Instituto Continental</strong> — Ciencia de Datos e Inteligencia Artificial — Proyecto Productivo IIIA</p>
-<p><strong>Integrantes:</strong> Alarcón Olmedo Víctor Efraín · Inuma Macedo Mariana Milagros · Méndez Macedo Karen Yaseli · Salinas Llana Jhim Anthony</p>
+<p><strong>Integrantes:</strong> Alarcón Olmedo Víctor Efraín · Inuma Macedo Mariana Milagros · Méndez Macedo Karen Yaseli</p>
 <p><strong>Docente:</strong> Sergio Víctor Orizano Salvador — Huancayo, 2026</p>
 <hr/>
 <blockquote>
@@ -7892,8 +7892,8 @@ a.anchor-link {
     <span class="p">(</span><span class="s1">'bronze'</span><span class="p">,</span> <span class="s1">'citas_raw'</span><span class="p">):</span> <span class="mi">110527</span><span class="p">,</span> <span class="p">(</span><span class="s1">'silver'</span><span class="p">,</span> <span class="s1">'citas_cleaned'</span><span class="p">):</span> <span class="mi">110527</span><span class="p">,</span>
     <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'ml_train_dataset'</span><span class="p">):</span> <span class="mi">110527</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'dim_barrio'</span><span class="p">):</span> <span class="mi">81</span><span class="p">,</span>
     <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'dim_paciente'</span><span class="p">):</span> <span class="mi">62299</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'dim_tiempo'</span><span class="p">):</span> <span class="mi">27</span><span class="p">,</span>
-    <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'fact_citas'</span><span class="p">):</span> <span class="mi">110527</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'score_input'</span><span class="p">):</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'score_output'</span><span class="p">):</span> <span class="mi">50</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'feedback_loop'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'meta'</span><span class="p">,</span> <span class="s1">'log_procesos'</span><span class="p">):</span> <span class="s1">'&gt;= 7'</span>
+    <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'fact_citas'</span><span class="p">):</span> <span class="mi">110527</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'score_input'</span><span class="p">):</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'score_output'</span><span class="p">):</span> <span class="mi">200</span><span class="p">,</span> <span class="p">(</span><span class="s1">'gold'</span><span class="p">,</span> <span class="s1">'feedback_loop'</span><span class="p">):</span> <span class="mi">150</span><span class="p">,</span> <span class="p">(</span><span class="s1">'meta'</span><span class="p">,</span> <span class="s1">'log_procesos'</span><span class="p">):</span> <span class="s1">'&gt;= 7'</span>
 <span class="p">}</span>
 <span class="n">filas</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">esquema</span><span class="p">,</span> <span class="n">tabla</span> <span class="ow">in</span> <span class="n">tablas</span><span class="p">:</span>
@@ -7988,25 +7988,25 @@ a.anchor-link {
 <th>7</th>
 <td>gold</td>
 <td>score_input</td>
-<td>50</td>
+<td>200</td>
 </tr>
 <tr>
 <th>8</th>
 <td>gold</td>
 <td>score_output</td>
-<td>50</td>
+<td>200</td>
 </tr>
 <tr>
 <th>9</th>
 <td>gold</td>
 <td>feedback_loop</td>
-<td>0</td>
+<td>150</td>
 </tr>
 <tr>
 <th>10</th>
 <td>meta</td>
 <td>log_procesos</td>
-<td>13</td>
+<td>17</td>
 </tr>
 </tbody>
 </table>
@@ -8547,7 +8547,7 @@ PROGRAMA DE APOYO SOCIAL 'BOLSA FAMÍLIA' (grupo vulnerable):
 <h2 id="10.-Resultados-Esperados">10. Resultados Esperados<a class="anchor-link" href="#10.-Resultados-Esperados">¶</a></h2><ol>
 <li><strong>Rendimiento algorítmico verificado:</strong> Recall de <strong>0.86</strong> (meta ≥ 0.85, cumplida mediante <em>Threshold Tuning</em> con umbral 0.48) y ROC-AUC de <strong>0.7352</strong> (supera al baseline lineal por 9.1%), garantizando la identificación de la gran mayoría de los pacientes propensos a no asistir: en el conjunto de prueba (22.106 citas) solo 625 inasistentes no fueron detectados.</li>
 <li><strong>Arquitectura centralizada en la nube, replicada y verificada:</strong> despliegue de la estructura Medallion completa dentro de Supabase —incluido el modelo estrella poblado—, manteniendo la trazabilidad desde <code>bronze.citas_raw</code> (110.527 registros) hasta <code>score_output</code> y <code>feedback_loop</code> (Gold), con auditoría de cada proceso en <code>meta.log_procesos</code>.</li>
-<li><strong>Focalización operativa eficiente:</strong> en la muestra inicial de 50 citas evaluadas por el sistema se clasificó 8% como Riesgo Alto, 56% Riesgo Medio y 36% Riesgo Bajo; el <em>scoring</em> masivo sobre la agenda completa consolidará la distribución definitiva, reduciendo sustancialmente la carga de llamadas manuales del personal de recepción (las llamadas se concentran exclusivamente en el segmento de alto riesgo).</li>
+<li><strong>Focalización operativa eficiente:</strong> la agenda operativa simulada (modo <em>replay</em> del histórico, script <code>src/09_simular_agenda_operativa.py</code>) puntuó 200 citas pendientes de los próximos 5 días: 11.5% Riesgo Alto (23 llamadas priorizadas) y 88.5% Riesgo Medio (recordatorios por mensajería). Las llamadas se concentran exclusivamente en el segmento de alto riesgo, reduciendo sustancialmente la carga manual del personal de recepción.</li>
 <li><strong>Respaldo económico por simulación reproducible:</strong> recuperación esperada de <strong>252 a 382 citas al mes</strong> (P5–P95, escenario base; hasta 529 en el escenario optimista) y reducción del costo por 1.000 citas de S/ 10.094 a S/ 8.360, según la simulación de Montecarlo de 10.000 iteraciones con supuestos documentados en el código fuente.</li>
 <li><strong>Interfaz interactiva funcional (MVP):</strong> aplicación en Streamlit (<code>app.py</code>) plenamente operativa que permite realizar la gestión diaria y evaluaciones individuales en menos de 1 segundo por consulta, con generación automática del mensaje de recordatorio personalizado para WhatsApp.</li>
 </ol>
@@ -8721,7 +8721,7 @@ ROC-AUC (threshold-free): 0.7352
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">FALLBACK_DISTRIBUCION</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'🟡 Riesgo Medio (40</span><span class="si">%-69%</span><span class="s1">)'</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span> <span class="s1">'🟢 Riesgo Bajo (&lt; 40%)'</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span> <span class="s1">'🔴 Riesgo Alto (≥ 70%)'</span><span class="p">:</span> <span class="mi">4</span>
+    <span class="s1">'🟡 Riesgo Medio (40</span><span class="si">%-69%</span><span class="s1">)'</span><span class="p">:</span> <span class="mi">177</span><span class="p">,</span> <span class="s1">'🔴 Riesgo Alto (≥ 70%)'</span><span class="p">:</span> <span class="mi">23</span>
 <span class="p">}</span>
 <span class="k">if</span> <span class="n">supabase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
@@ -8777,18 +8777,13 @@ ROC-AUC (threshold-free): 0.7352
 <tbody>
 <tr>
 <th>🟡 Riesgo Medio (40%-69%)</th>
-<td>28</td>
-<td>56.0</td>
-</tr>
-<tr>
-<th>🟢 Riesgo Bajo (&lt; 40%)</th>
-<td>18</td>
-<td>36.0</td>
+<td>177</td>
+<td>88.5</td>
 </tr>
 <tr>
 <th>🔴 Riesgo Alto (≥ 70%)</th>
-<td>4</td>
-<td>8.0</td>
+<td>23</td>
+<td>11.5</td>
 </tr>
 </tbody>
 </table>
