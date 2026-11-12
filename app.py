@@ -661,8 +661,7 @@ elif menu_opcion == "ℹ️ Información y Ayuda":
             <div class="info-box">
                 1. <b>Alarcón Olmedo Víctor Efraín</b><br>
                 2. <b>Inuma Macedo Mariana Milagros</b><br>
-                3. <b>Méndez Macedo Karen Yaseli</b><br>
-                4. <b>Salinas Llana Jhim Anthony</b>
+                3. <b>Méndez Macedo Karen Yaseli</b>
             </div>
         """, unsafe_allow_html=True)
 
