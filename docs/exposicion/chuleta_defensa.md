@@ -19,7 +19,7 @@ cat reports/simulacion_montecarlo_resumen.csv
 **Momentos de demo por expositor:**
 - **Exp. 1:** HTML → tabla inventario 11 tablas (punto 1) + gráfico lead time (punto 2)
 - **Exp. 2:** HTML → tabla benchmark (punto 14) + matriz de confusión (punto 13)
-- **Exp. 3:** app Streamlit (**agenda pendiente por día**, evaluador, Registro de Atención con KPIs de fidelización) + histograma Montecarlo
+- **Exp. 3:** app Streamlit (**agenda pendiente por día**, Agendamiento Inteligente, Registro de Atención con KPIs de fidelización) + histograma Montecarlo
 
 ## 2. Los números base (memorizar sí o sí)
 

@@ -123,7 +123,7 @@ def cargar_modelo():
 
 artefacto_ml = cargar_modelo()
 
-# Estados para los Presets del Evaluador
+# Estados para los Presets del Agendamiento Inteligente
 if "sim_lead_time" not in st.session_state: st.session_state.sim_lead_time = 14
 if "sim_age" not in st.session_state: st.session_state.sim_age = 28
 if "sim_noshows" not in st.session_state: st.session_state.sim_noshows = 1
@@ -145,7 +145,7 @@ with st.sidebar:
         "📌 Menú Principal",
         [
             "📊 Resumen de la Agenda",
-            "🔮 Evaluador de Citas",
+            "📅 Agendamiento Inteligente",
             "🗺️ Ubicación y Cobertura",
             "🔄 Registro de Atención",
             "ℹ️ Información y Ayuda"
@@ -287,13 +287,13 @@ if menu_opcion == "📊 Resumen de la Agenda":
             st.info("Seleccione al menos un intervalo para visualizar los datos.")
 
 # ----------------------------------------------------------------------------
-# OPCIÓN 2: EVALUADOR DE CITAS
+# OPCIÓN 2: AGENDAMIENTO INTELIGENTE (REGISTRA + PUNTÚA AL INSTANTE)
 # ----------------------------------------------------------------------------
-elif menu_opcion == "🔮 Evaluador de Citas":
+elif menu_opcion == "📅 Agendamiento Inteligente":
     st.markdown("""
         <div class="header-banner">
-            <h2 style='margin:0;'>🔮 Evaluador de Asistencia a Cita Médica</h2>
-            <p style='margin:5px 0 0 0; opacity:0.9;'>Ingresa los datos del paciente para obtener la recomendación y enviar la notificación personalizada</p>
+            <h2 style='margin:0;'>📅 Agendamiento Inteligente</h2>
+            <p style='margin:5px 0 0 0; opacity:0.9;'>Registra la cita del paciente, la puntúa al instante con el modelo campeón y la envía a la agenda priorizada</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -352,7 +352,7 @@ elif menu_opcion == "🔮 Evaluador de Citas":
                 handcap = st.selectbox("Discapacidad", [0, 1], format_func=lambda x: "Sí" if x == 1 else "No")
                 sms_received = st.selectbox("¿SMS Enviado?", [0, 1], index=int(st.session_state.sim_sms), format_func=lambda x: "Sí" if x == 1 else "No")
 
-            btn_evaluar = st.form_submit_button("🚀 Evaluar Riesgo y Generar Notificación", use_container_width=True)
+            btn_evaluar = st.form_submit_button("🚀 Agendar Cita y Evaluar Riesgo al Instante", use_container_width=True)
 
         if btn_evaluar:
             model = artefacto_ml["model"]

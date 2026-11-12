@@ -100,7 +100,7 @@
 **Desarrollo:** Para el MVP definimos RLS en las 11 tablas dentro del DDL. Datos de salud exigen minimizar exposición; además la clave secreta nunca sale del `.env` (fuera del repositorio) — el despliegue público usaría solo la clave `anon`.
 
 ### C5. ¿El scoring es en tiempo real o por lotes?
-**Corta:** Ambos, según el caso de uso: scoring masivo de la agenda en lote (batch) hacia `score_output`, y el evaluador individual de la app responde en vivo (< 1 segundo) con el mismo artefacto.
+**Corta:** Ambos, según el caso de uso: scoring masivo de la agenda en lote (batch) hacia `score_output`, y el módulo de agendamiento inteligente de la app puntúa la cita al momento del registro (< 1 segundo) con el mismo artefacto.
 **Desarrollo:** Es la arquitectura estándar en producción: el batch alimenta el tablero diario de admisión; la predicción individual atiende consultas puntuales del personal. `feedback_loop` cierra el ciclo registrando el desenlace real.
 
 ---

@@ -82,7 +82,7 @@
 ### El producto: app Streamlit (70 s) — DEMO rápida (una captura de respaldo lista)
 
 - **Agenda pendiente en vivo:** 200 citas de los próximos 5 días priorizadas por el modelo — **23 de alto riesgo** para llamada prioritaria, 177 de riesgo medio para mensajería.
-- **Evaluador individual:** probabilidad en segundos + **mensaje de WhatsApp** personalizado generado automáticamente.
+- **Agendamiento inteligente:** la recepción registra la cita, el modelo la puntúa al instante + **mensaje de WhatsApp** personalizado generado automáticamente.
 - **Fidelización:** el registro post-consulta alimenta los **KPIs del ciclo** — piloto de 150 encuestas con satisfacción media **4,2 ⭐** y **20% de citas recuperadas** por reprogramación.
 - Regla operativa: Alto (≥70%) llamada · Medio (40–69%) WhatsApp/SMS · Bajo (<40%) correo.
 
