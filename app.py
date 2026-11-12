@@ -384,14 +384,17 @@ elif menu_opcion == "🔮 Evaluador de Citas":
             
             if prob_noshow >= 0.70:
                 nivel_txt = "🔴 Prioridad Alta - Alto Riesgo de Inasistencia"
+                nivel_db = "🔴 Riesgo Alto (≥ 70%)"
                 accion_txt = f"📞 Realizar Llamada Telefónica Preventiva al paciente {nombre_paciente} ({telefono_paciente})"
                 class_bg = "bg-high"
             elif prob_noshow >= 0.40:
                 nivel_txt = "🟡 Prioridad Media - Riesgo Moderado"
+                nivel_db = "🟡 Riesgo Medio (40%-69%)"
                 accion_txt = f"💬 Enviar Recordatorio Interactivo de WhatsApp al paciente {nombre_paciente}"
                 class_bg = "bg-medium"
             else:
                 nivel_txt = "🟢 Prioridad Normal - Bajo Riesgo"
+                nivel_db = "🟢 Riesgo Bajo (< 40%)"
                 accion_txt = f"✉️ Enviar Recordatorio Estándar al paciente {nombre_paciente}"
                 class_bg = "bg-low"
 
@@ -436,15 +439,32 @@ elif menu_opcion == "🔮 Evaluador de Citas":
 
             if supabase:
                 try:
+                    # 1) La cita evaluada entra como pendiente en score_input
+                    #    (mismo contrato que el pipeline batch) → aparece en la agenda
+                    fecha_reserva = fecha_cita - datetime.timedelta(days=int(lead_time))
+                    input_data = {
+                        "appointment_id": int(appointment_id), "patient_id": int(patient_id),
+                        "scheduled_day": fecha_reserva.isoformat() + "T09:00:00Z",
+                        "appointment_day": fecha_cita.isoformat() + "T" + hora_cita.strftime("%H:%M:%S") + "Z",
+                        "lead_time": int(lead_time), "age": int(age),
+                        "scholarship": int(scholarship), "hipertension": int(hipertension),
+                        "diabetes": int(diabetes), "alcoholism": int(alcoholism),
+                        "handcap": int(handcap), "sms_received": int(sms_received),
+                        "historical_noshows": int(historical_noshows)
+                    }
+                    supabase.schema("gold").table("score_input").insert(input_data).execute()
+
+                    # 2) El resultado queda en score_output con el mismo vocabulario
+                    #    del pipeline ("Riesgo Alto/Medio/Bajo") para el tablero
                     score_data = {
-                        "appointment_id": appointment_id, "patient_id": patient_id,
-                        "probability_noshow": prob_noshow, "risk_level": nivel_txt,
-                        "recommended_action": accion_txt
+                        "appointment_id": int(appointment_id), "patient_id": int(patient_id),
+                        "probability_noshow": round(float(prob_noshow), 4),
+                        "risk_level": nivel_db, "recommended_action": accion_txt
                     }
                     supabase.schema("gold").table("score_output").insert(score_data).execute()
-                    st.success("✅ Evaluación registrada correctamente en la base de datos.")
-                except Exception:
-                    pass
+                    st.success("✅ Evaluación registrada en `gold.score_input` y `gold.score_output` — la cita ya aparece en la Agenda Pendiente.")
+                except Exception as e:
+                    st.error(f"⚠️ No se pudo registrar la evaluación en la base de datos: {e}")
 
 # ----------------------------------------------------------------------------
 # OPCIÓN 3: UBICACIÓN Y COBERTURA (DATOS GEOGRÁFICOS BRASIL)
