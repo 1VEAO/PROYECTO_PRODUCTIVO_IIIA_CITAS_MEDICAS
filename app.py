@@ -332,13 +332,15 @@ elif menu_opcion == "📅 Agendamiento Inteligente":
 
             with c_b:
                 especialidad = st.selectbox("Especialidad Médica", ["Cardiología", "Medicina General", "Pediatría", "Ginecología", "Oftalmología", "Traumatología"])
-                fecha_cita = st.date_input("Fecha Programada de la Cita", value=datetime.date.today() + datetime.timedelta(days=int(st.session_state.sim_lead_time)))
+                fecha_cita = st.date_input("Fecha Programada de la Cita",
+                                           value=datetime.date.today() + datetime.timedelta(days=int(st.session_state.sim_lead_time)),
+                                           min_value=datetime.date.today())  # un agendamiento no registra citas en el pasado
+                st.caption(f"⏱️ Anticipación calculada automáticamente: **{(fecha_cita - datetime.date.today()).days} días** (fecha de cita − hoy)")
                 hora_cita = st.time_input("Hora Programada", value=datetime.time(10, 30))
                 barrio_paciente = st.selectbox("Barrio / Distrito", ["JARDIM DA PENHA", "MARIA ORTIZ", "RESISTÊNCIA", "JARDIM CAMBURI", "ITARARÉ", "SANTA MARTHA"])
 
             with c_c:
                 age = st.slider("Edad del Paciente", 0, 100, int(st.session_state.sim_age))
-                lead_time = st.slider("Días de Anticipación (Lead Time)", 0, 90, int(st.session_state.sim_lead_time))
                 historical_noshows = st.number_input("Inasistencias Anteriores Registradas", min_value=0, value=int(st.session_state.sim_noshows), step=1)
                 scholarship = st.selectbox("¿Apoyo Social (Programa)?", [0, 1], format_func=lambda x: "Sí" if x == 1 else "No")
 
@@ -355,6 +357,9 @@ elif menu_opcion == "📅 Agendamiento Inteligente":
             btn_evaluar = st.form_submit_button("🚀 Agendar Cita y Evaluar Riesgo al Instante", use_container_width=True)
 
         if btn_evaluar:
+            # La anticipación se DERIVA de la fecha agendada (misma lógica que Silver:
+            # lead_time = fecha de cita − fecha de reserva; aquí la reserva es hoy)
+            lead_time = (fecha_cita - datetime.date.today()).days
             model = artefacto_ml["model"]
             features = artefacto_ml["features"]
             
@@ -378,9 +383,10 @@ elif menu_opcion == "📅 Agendamiento Inteligente":
             tel_centro = "(027) 3333-7000"
             fecha_str = fecha_cita.strftime("%d/%m/%Y")
             hora_str = hora_cita.strftime("%I:%M %p")
-            
+            texto_dias = "el día de hoy" if lead_time == 0 else f"en {lead_time} días"
+
             # Formato exacto requerido para el mensaje
-            msg_txt = f"Estimado/a {nombre_paciente}, le recordamos su cita en la especialidad de {especialidad} programada para el {fecha_str} a las {hora_str} (en {lead_time} días). Para confirmar responda '1' a este WhatsApp o llame al {tel_centro}. Si requiere reprogramar o cancelar, por favor comuníquese al mismo número. ¡Le esperamos!"
+            msg_txt = f"Estimado/a {nombre_paciente}, le recordamos su cita en la especialidad de {especialidad} programada para el {fecha_str} a las {hora_str} ({texto_dias}). Para confirmar responda '1' a este WhatsApp o llame al {tel_centro}. Si requiere reprogramar o cancelar, por favor comuníquese al mismo número. ¡Le esperamos!"
             
             if prob_noshow >= 0.70:
                 nivel_txt = "🔴 Prioridad Alta - Alto Riesgo de Inasistencia"
