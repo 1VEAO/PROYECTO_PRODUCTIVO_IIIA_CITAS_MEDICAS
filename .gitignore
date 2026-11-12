@@ -35,3 +35,12 @@ data/*
 !data/raw/
 data/raw/*
 !data/raw/citas_medicas_raw.csv
+
+# ===========================================================================
+# Documentos de entrega y defensa (fuera del repositorio: solo el proyecto)
+# El informe CPP2 se entrega por separado (notebook/HTML/ODT/DOCX) y el
+# material de defensa es interno del equipo.
+# ===========================================================================
+docs/exposicion/
+notebook/01_informe_cpp2_ejecutable.ipynb
+informe_cpp2_ejecutable.html
